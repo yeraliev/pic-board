@@ -11,7 +11,7 @@ class ChangePassword extends StatefulWidget {
 }
 
 class _ChangePasswordState extends State<ChangePassword> {
-  final oldPasswordController = TextEditingController();
+  final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
   @override
@@ -45,7 +45,7 @@ class _ChangePasswordState extends State<ChangePassword> {
               ),
               SizedBox(height: 10.h,),
               AuthTextField(
-                controller: oldPasswordController,
+                controller: currentPasswordController,
                 hintText: 'Current password',
                 validator: (value) {
                   return ValidatorAuth().validatePassword(value);
