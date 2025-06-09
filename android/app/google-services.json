@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "768861713961",
+    "project_id": "picboard-ff18c",
+    "storage_bucket": "picboard-ff18c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768861713961:android:ba958bd52dd66a1d654e38",
+        "android_client_info": {
+          "package_name": "com.example.pic_board"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768861713961-fv5sa2p507m1k6fbstb8n1uu6t8d2uc0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi8PVVZLZ2AbblkigoNJUfEqHgzOBGrok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768861713961-fv5sa2p507m1k6fbstb8n1uu6t8d2uc0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "768861713961-or5ercvnm83gulp7lg3m3eakbas0cf82.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.picBoard"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
