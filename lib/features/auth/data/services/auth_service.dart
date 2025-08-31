@@ -41,14 +41,16 @@ class AuthService {
   }
 
   //change password
-  Future<void> changePassword({required String email, required String password, required String newPassword}) async {
-    AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
+  Future<void> changePassword({required String password, required String newPassword}) async {
+    print(currentUser!.email!);
+    print(password);
+    AuthCredential credential = EmailAuthProvider.credential(email: currentUser!.email!, password: password);
     await currentUser!.reauthenticateWithCredential(credential);
     await currentUser!.updatePassword(newPassword);
   }
 
   //set avatar or update avatar
   Future<void> changeAvatar({required String avatarPath}) async {
-    await currentUser?.updatePhotoURL(avatarPath);
+    await currentUser!.updatePhotoURL(avatarPath);
   }
 }

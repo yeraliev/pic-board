@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pic_board/core/snackbar/custom_snackbar.dart';
+import 'package:pic_board/features/auth/data/services/auth_service.dart';
 import 'package:pic_board/features/auth/domain/use_cases/validator_auth.dart';
 import 'package:pic_board/features/auth/presentation/widgets/auth_text_field.dart';
+
+import '../../../../core/navigation_bar/navigation_bar.dart';
+import '../../../auth/presentation/widgets/auth_button.dart';
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -13,6 +18,8 @@ class ChangePassword extends StatefulWidget {
 class _ChangePasswordState extends State<ChangePassword> {
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
+  bool isLoading = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +51,61 @@ class _ChangePasswordState extends State<ChangePassword> {
                 ),
               ),
               SizedBox(height: 10.h,),
-              AuthTextField(
-                controller: currentPasswordController,
-                hintText: 'Current password',
-                validator: (value) {
-                  return ValidatorAuth().validatePassword(value);
-                },
-                isPassword: true,
+              Form(
+                key: _formKey,
+                child: Column(
+                children: [
+                  AuthTextField(
+                    controller: currentPasswordController,
+                    hintText: 'Current password',
+                    validator: (value) {
+                      return ValidatorAuth().validatePassword(value);
+                    },
+                    isPassword: true,
+                  ),
+                  SizedBox(height: 10.h,),
+                  AuthTextField(
+                    controller: newPasswordController,
+                    hintText: 'New password',
+                    validator: (value) {
+                      return ValidatorAuth().validatePassword(value);
+                    },
+                    isPassword: true,
+                  ),
+                ],
+              )),
+              Spacer(),
+              isLoading ? Center(child: CircularProgressIndicator())
+                  : AuthButton(
+                  title: 'Save',
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        String oldPassword = currentPasswordController.text.trim();
+                        String newPassword = newPasswordController.text.trim();
+                        AuthService().changePassword(password: oldPassword, newPassword: newPassword);
+                        await AuthService().currentUser!.reload();
+                        CustomSnackBar().showSnackBar(context, text: 'Password was successfully changed!', type: 'success');
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => CustomBar(destination: 2)),
+                              (Route<dynamic> route) => false,
+                        );
+                      } catch (e) {
+                        print(e.toString());
+                        CustomSnackBar().showSnackBar(context, text: 'Failed to change password, try later!', type: 'error');
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }
+                  }
               ),
             ],
           ),

@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pic_board/core/snackbar/custom_snackbar.dart';
 import 'package:pic_board/features/auth/presentation/widgets/auth_button.dart';
 import 'package:pic_board/features/settings/presentation/pages/change_password.dart';
 import 'package:pic_board/features/settings/presentation/pages/edit_name.dart';
@@ -19,6 +25,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final ImagePicker _imagePicker = ImagePicker();
 
   Future<void> signOut() async {
     try {
@@ -26,13 +33,71 @@ class _SettingsPageState extends State<SettingsPage> {
 
       await AuthService().signOut();
 
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
-
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MyApp()),
+        (Route<dynamic> route) => false,
+      );
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         LoadingDialog.hide(context);
       }
       print(e.message);
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final image = await _imagePicker.pickImage(source: source);
+
+      if (image != null) {
+        await _uploadImageToFirebase(File(image.path));
+      } else {
+        return;
+      }
+    } catch (e) {
+      CustomSnackBar().showSnackBar(
+        context,
+        text: 'Failed to pick the image!',
+        type: 'error',
+      );
+    }
+  }
+
+  Future<void> _uploadImageToFirebase(File image) async {
+    try {
+      String imageDownloadUrl = "";
+      Reference ref = FirebaseStorage.instance.ref().child(
+        'avatars/${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await ref.putFile(image);
+      imageDownloadUrl = await ref.getDownloadURL();
+      await changeAvatar(imageDownloadUrl);
+    } catch (e) {
+      print(e.toString());
+      CustomSnackBar().showSnackBar(
+        context,
+        text: 'Failed to change the avatar!',
+        type: 'error',
+      );
+    }
+  }
+
+  Future<void> changeAvatar(String url) async {
+    try {
+      await AuthService().changeAvatar(avatarPath: url);
+      CustomSnackBar().showSnackBar(
+        context,
+        text: 'Avatar changed successfully!',
+        type: 'success',
+      );
+    } catch (e) {
+      print(e.toString());
+      CustomSnackBar().showSnackBar(
+        context,
+        text: 'Failed to change avatar, try again!',
+        type: 'error',
+      );
     }
   }
 
@@ -45,9 +110,9 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text(
           "Settings",
           style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 16.sp,
-              color: Theme.of(context).colorScheme.onSurface
+            fontWeight: FontWeight.w700,
+            fontSize: 16.sp,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
@@ -56,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 10.h,),
+            SizedBox(height: 10.h),
             Padding(
               padding: EdgeInsets.only(left: 15.w),
               child: Text(
@@ -64,21 +129,42 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
             SizedBox(height: 10.h),
-            _buildSettingsSection(title: 'Edit name', icon: Icons.drive_file_rename_outline_sharp, iconColor: Colors.blue ,onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EditName()));
-            }),
+            _buildSettingsSection(
+              title: 'Edit name',
+              icon: Icons.drive_file_rename_outline_sharp,
+              iconColor: Colors.blue,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditName()),
+                );
+              },
+            ),
             _buildDivider(),
-            _buildSettingsSection(title: 'Change password', icon: Icons.lock_sharp, iconColor: Colors.red ,onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ChangePassword()));
-            }),
+            _buildSettingsSection(
+              title: 'Change password',
+              icon: Icons.lock_sharp,
+              iconColor: Colors.red,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangePassword()),
+                );
+              },
+            ),
             _buildDivider(),
-            _buildSettingsSection(title: 'Change avatar', icon: Icons.image, iconColor: Colors.green ,onTap: () {}),
-            Divider(color: Colors.grey.shade300, thickness: 0.3,),
+            _buildSettingsSection(
+              title: 'Change avatar',
+              icon: Icons.image,
+              iconColor: Colors.green,
+              onTap: () => _showImageSourcePicker(),
+            ),
+            Divider(color: Colors.grey.shade300, thickness: 0.3),
             Padding(
               padding: EdgeInsets.only(left: 15.w),
               child: Text(
@@ -86,31 +172,36 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
             SizedBox(height: 10.h),
-            _buildSettingsSection(title: 'Dark Mode', icon: Icons.dark_mode_rounded, iconColor: Colors.blue, trailing: _buildDarkModeSwitch()),
+            _buildSettingsSection(
+              title: 'Dark Mode',
+              icon: Icons.dark_mode_rounded,
+              iconColor: Colors.blue,
+              trailing: _buildDarkModeSwitch(),
+            ),
           ],
         ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-          child: AuthButton(title: 'Sign out', onPressed: signOut)
-        )
+          child: AuthButton(title: 'Sign out', onPressed: signOut),
+        ),
       ),
     );
   }
 
   Widget _buildDarkModeSwitch() {
     return Switch.adaptive(
-        activeColor: Theme.of(context).colorScheme.primary,
-        value: Provider.of<ThemeProvider>(context).themeMode==darkMode,
-        onChanged: (value) {
-          Provider.of<ThemeProvider>(context, listen: false).changeToDarkMode();
-        }
+      activeColor: Theme.of(context).colorScheme.primary,
+      value: Provider.of<ThemeProvider>(context).themeMode == darkMode,
+      onChanged: (value) {
+        Provider.of<ThemeProvider>(context, listen: false).changeToDarkMode();
+      },
     );
   }
 
@@ -118,8 +209,8 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required IconData icon,
     Widget? trailing,
-    VoidCallback?  onTap,
-    required Color iconColor
+    VoidCallback? onTap,
+    required Color iconColor,
   }) {
     return Padding(
       padding: EdgeInsets.all(0),
@@ -128,21 +219,17 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: Container(
           decoration: BoxDecoration(
             color: iconColor,
-            borderRadius: BorderRadius.circular(15.r)
+            borderRadius: BorderRadius.circular(15.r),
           ),
           padding: EdgeInsets.all(8.w),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 20.w,
-          ),
+          child: Icon(icon, color: Colors.white, size: 20.w),
         ),
         title: Text(
           title,
           style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.onSurface
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         trailing: trailing,
@@ -152,8 +239,56 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildDivider() {
     return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0),
-        child: Divider(color: Colors.grey.shade300, thickness: 0.2, height: 0,)
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0),
+      child: Divider(color: Colors.grey.shade300, thickness: 0.2, height: 0),
     );
+  }
+
+  Future<void> _showImageSourcePicker() async {
+    if (Platform.isIOS) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (_) {
+          return CupertinoActionSheet(
+            title: Text('Choose the source'),
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                child: Text('Gallery'),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () => _pickImage(ImageSource.camera),
+                child: Text('Camera'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text('Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Camera'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
