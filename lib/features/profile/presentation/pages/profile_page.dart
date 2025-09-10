@@ -28,14 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
-        title: Text(
-          'Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16.sp,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
+        title: const Text("Profile"),
       ),
       body: SafeArea(
         child: Padding(
