@@ -11,6 +11,7 @@ import 'package:pic_board/features/auth/presentation/widgets/auth_button.dart';
 import 'package:pic_board/features/settings/presentation/pages/change_password.dart';
 import 'package:pic_board/features/settings/presentation/pages/edit_name.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/navigation_bar/navigation_bar.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/loading_dialog.dart';
@@ -51,11 +52,15 @@ class _SettingsPageState extends State<SettingsPage> {
       final image = await _imagePicker.pickImage(source: source);
 
       if (image != null) {
+        LoadingDialog.show(context);
         await _uploadImageToFirebase(File(image.path));
+        LoadingDialog.hide(context);
       } else {
         return;
       }
     } catch (e) {
+      print(e.toString());
+      LoadingDialog.hide(context);
       CustomSnackBar().showSnackBar(
         context,
         text: 'Failed to pick the image!',
@@ -67,9 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _uploadImageToFirebase(File image) async {
     try {
       String imageDownloadUrl = "";
-      Reference ref = FirebaseStorage.instance.ref().child(
-        'avatars/${DateTime.now().millisecondsSinceEpoch}.png',
-      );
+      Reference ref = FirebaseStorage.instance.ref().child("avatars/${DateTime.now().millisecondsSinceEpoch}.png");
       await ref.putFile(image);
       imageDownloadUrl = await ref.getDownloadURL();
       await changeAvatar(imageDownloadUrl);
@@ -86,6 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> changeAvatar(String url) async {
     try {
       await AuthService().changeAvatar(avatarPath: url);
+      Navigator.pop(context);
       CustomSnackBar().showSnackBar(
         context,
         text: 'Avatar changed successfully!',
@@ -93,6 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } catch (e) {
       print(e.toString());
+      Navigator.pop(context);
       CustomSnackBar().showSnackBar(
         context,
         text: 'Failed to change avatar, try again!',

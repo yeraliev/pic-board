@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthService {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
+  Stream<User?> get authState => firebaseAuth.authStateChanges();
+
   User? get currentUser => firebaseAuth.currentUser;
 
   //sign in
@@ -52,5 +54,7 @@ class AuthService {
   //set avatar or update avatar
   Future<void> changeAvatar({required String avatarPath}) async {
     await currentUser!.updatePhotoURL(avatarPath);
+    await currentUser!.reload();
+
   }
 }

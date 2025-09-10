@@ -1,12 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pic_board/features/settings/presentation/pages/settings_page.dart';
-import 'package:pic_board/main.dart';
-
-import '../../../../core/widgets/loading_dialog.dart';
-import '../../../auth/data/services/auth_service.dart';
-import '../../../auth/presentation/widgets/auth_button.dart';
+import 'package:provider/provider.dart';
+import '../../../auth/data/providers/user_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -16,31 +12,36 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final User _user = AuthService().currentUser!;
-
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>().user;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            _user.email.toString(),
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16.sp,
-              color: Theme.of(context).colorScheme.onSurface
-            ),
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16.sp,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
           child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -54,30 +55,43 @@ class _ProfilePageState extends State<ProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       CircleAvatar(
-                        backgroundColor: Colors.white,
                         radius: 25.r,
-                        child: SizedBox(
-                          width: 30.w,
-                          child: Image.asset('assets/images/user.png')
-                        ),
+                        backgroundColor: Colors.white,
+                        backgroundImage: user.photoURL != null
+                            ? NetworkImage(user.photoURL!)
+                            : const AssetImage('assets/images/user.png'),
                       ),
                       SizedBox(width: 20.w),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _user.displayName.toString(),
+                            user.displayName ?? 'No name',
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onPrimary
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                          )
+                          ),
+                          Text(
+                            user.email ?? 'No email',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
                         ],
                       ),
-                      Spacer(),
+                      const Spacer(),
                       IconButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsPage(),
+                            ),
+                          );
                         },
                         icon: Icon(
                           Icons.settings,
@@ -87,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
