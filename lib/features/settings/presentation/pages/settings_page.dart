@@ -5,7 +5,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pic_board/core/snackbar/custom_snackbar.dart';
 import 'package:pic_board/features/auth/presentation/widgets/auth_button.dart';
 import 'package:pic_board/features/settings/presentation/pages/change_password.dart';
@@ -72,8 +74,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _uploadImageToFirebase(File image) async {
     try {
       String imageDownloadUrl = "";
+      final compressedImage = await _compressImage(image);
       Reference ref = FirebaseStorage.instance.ref().child("avatars/${DateTime.now().millisecondsSinceEpoch}.png");
-      await ref.putFile(image);
+      await ref.putFile(compressedImage);
       imageDownloadUrl = await ref.getDownloadURL();
       await changeAvatar(imageDownloadUrl);
     } catch (e) {
@@ -84,6 +87,30 @@ class _SettingsPageState extends State<SettingsPage> {
         type: 'error',
       );
     }
+  }
+
+  Future<File> _compressImage(File image) async {
+    final bytes = await image.readAsBytes();
+    final originalImage = img.decodeImage(bytes);
+
+    if (originalImage == null) throw Exception("Could not decode image");
+
+    img.Image resized = originalImage;
+    if (originalImage.width > 1024 || originalImage.height > 1024) {
+      resized = img.copyResize(
+        originalImage,
+        width: originalImage.width > originalImage.height ? 1024 : null,
+        height: originalImage.height > originalImage.width ? 1024 : null,
+      );
+    }
+
+    final compressedBytes = img.encodeJpg(resized, quality: 70);
+
+    final tempDir = await getTemporaryDirectory();
+    final compressedFile = File('${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await compressedFile.writeAsBytes(compressedBytes);
+
+    return compressedFile;
   }
 
   Future<void> changeAvatar(String url) async {
