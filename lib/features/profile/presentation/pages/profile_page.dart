@@ -29,6 +29,37 @@ class _ProfilePageState extends State<ProfilePage> {
     return _userPostsStream!;
   }
 
+  Future<void> likeAndUnlike(String postId, User user) async {
+    final currentUserId = user.uid;
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    final ref = _firestore.collection('posts').doc(postId);
+    final postData = await ref.get();
+    final likedBy = postData['likedBy'] ?? [];
+
+    if (likedBy.contains(currentUserId)) {
+      await ref.update(
+        {
+          'likes': FieldValue.increment(-1),
+          'likedBy': FieldValue.arrayRemove([currentUserId])
+        }
+      );
+      setState(() {
+
+      });
+    }else {
+      await ref.update(
+          {
+            'likes': FieldValue.increment(1),
+            'likedBy': FieldValue.arrayUnion([currentUserId])
+          }
+      );
+      setState(() {
+        
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().user;
@@ -75,6 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(
             fontSize: 19.sp,
             fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         SizedBox(height: 10.h),
@@ -138,6 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 final imageUrl = data['imageUrl'] ?? '';
 
                 return GestureDetector(
+                  onDoubleTap: () => likeAndUnlike(posts[index].id, user),
                   onTap: () {
                     print(data);
                   },
@@ -176,6 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -187,11 +221,19 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          Icon(
-                            Icons.favorite,
-                            size: 16.w,
+                          IconButton(
+                            onPressed: () => likeAndUnlike(posts[index].id, user),
+                            icon: data['likedBy'].contains(user.uid) ? Icon(
+                              Icons.favorite,
+                              size: 16.w,
+                            ) :
+                            Icon(
+                              Icons.favorite_border_outlined,
+                              size: 16.w,
+                            ),
                           ),
                           SizedBox(width: 10.w,)
                         ],

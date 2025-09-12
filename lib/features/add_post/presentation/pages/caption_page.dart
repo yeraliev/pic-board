@@ -62,6 +62,7 @@ class _CaptionPageState extends State<PostCaptionPage> {
         "imageUrl": photoURL,
         "caption": caption,
         "likes": 0,
+        "likedBy": [],
         "timestamp": DateTime.now(),
       };
 
@@ -120,6 +121,7 @@ class _CaptionPageState extends State<PostCaptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         centerTitle: true,
         title: const Text('New Post'),
         automaticallyImplyLeading: true,
@@ -143,7 +145,8 @@ class _CaptionPageState extends State<PostCaptionPage> {
                     controller: captionController,
                     style: TextStyle(
                       fontSize: 14.sp,
-                      fontWeight: FontWeight.w600
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface
                     ),
                     decoration: InputDecoration(
                       hintText: 'Caption',

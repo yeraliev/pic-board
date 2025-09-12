@@ -125,6 +125,8 @@ class _AddPostPageState extends State<AddPostPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("New Post"),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
         actions: [
           TextButton(
             onPressed: _goToCaptionPage,
