@@ -9,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pic_board/core/snackbar/custom_snackbar.dart';
+import 'package:pic_board/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:pic_board/features/auth/presentation/widgets/auth_button.dart';
 import 'package:pic_board/features/settings/presentation/pages/change_password.dart';
 import 'package:pic_board/features/settings/presentation/pages/edit_name.dart';
@@ -38,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => MyApp()),
+        MaterialPageRoute(builder: (context) => SignInPage()),
         (Route<dynamic> route) => false,
       );
     } on FirebaseAuthException catch (e) {
@@ -285,11 +286,17 @@ class _SettingsPageState extends State<SettingsPage> {
             title: Text('Choose the source'),
             actions: [
               CupertinoActionSheetAction(
-                onPressed: () => _pickImage(ImageSource.gallery),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
                 child: Text('Gallery'),
               ),
               CupertinoActionSheetAction(
-                onPressed: () => _pickImage(ImageSource.camera),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
                 child: Text('Camera'),
               ),
             ],
@@ -308,6 +315,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text('Gallery'),
                 onTap: () {
                   Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
                 },
               ),
               ListTile(
@@ -315,6 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text('Camera'),
                 onTap: () {
                   Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
                 },
               ),
             ],

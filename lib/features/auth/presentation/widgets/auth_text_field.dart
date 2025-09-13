@@ -35,6 +35,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
           color: Theme.of(context).colorScheme.onSurface
         ),
         suffixIcon: widget.isPassword ? IconButton(onPressed: () {
+          if (!mounted) return;
           setState(() {
             _visiblePassword = !_visiblePassword;
           });

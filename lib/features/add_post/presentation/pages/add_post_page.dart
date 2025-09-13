@@ -90,7 +90,10 @@ class _AddPostPageState extends State<AddPostPage> {
       itemBuilder: (_, index) {
         final media = mediaList[index];
         return GestureDetector(
-          onTap: () => setState(() => selectedMedia = media),
+          onTap: () {
+            if (!mounted) return;
+            setState(() => selectedMedia = media);
+          },
           child: FutureBuilder<Uint8List?>(
             future: media.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
             builder: (_, snapshot) {

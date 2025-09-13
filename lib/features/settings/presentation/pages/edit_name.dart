@@ -87,11 +87,13 @@ class _EditNameState extends State<EditName> {
                     CustomSnackBar().showSnackBar(context, text: 'You can\'t change your name to old one!', type: 'error');
                   }else {
                     if(_formKey.currentState!.validate()) {
+                      if (!mounted) return;
                       setState(() {
                         isLoading = true;
                       });
                       await AuthService().changeName(name: changedNameController.text.trim());
                       await AuthService().currentUser!.reload();
+                      if (!mounted) return;
                       setState(() {
                         isLoading = false;
                       });

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -44,9 +46,6 @@ class _ProfilePageState extends State<ProfilePage> {
           'likedBy': FieldValue.arrayRemove([currentUserId])
         }
       );
-      setState(() {
-
-      });
     }else {
       await ref.update(
           {
@@ -54,9 +53,6 @@ class _ProfilePageState extends State<ProfilePage> {
             'likedBy': FieldValue.arrayUnion([currentUserId])
           }
       );
-      setState(() {
-        
-      });
     }
   }
 
@@ -114,35 +110,13 @@ class _ProfilePageState extends State<ProfilePage> {
           stream: userPostsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              // Log to console for debugging
-              debugPrint('User posts stream error: ${snapshot.error}');
-              // Show a friendly but informative message in UI
-              final error = snapshot.error;
+              log('User posts stream error: ${snapshot.error}');
               String message = 'Something went wrong';
-              if (error is FirebaseException) {
-                message = '${error.code}: ${error.message}';
-              } else {
-                message = error.toString();
-              }
-
               return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(12.w),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14.sp),
-                      ),
-                      SizedBox(height: 8.h),
-                      ElevatedButton(
-                        onPressed: () => setState(() {}),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+                child: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14.sp),
                 ),
               );
             }
@@ -153,7 +127,19 @@ class _ProfilePageState extends State<ProfilePage> {
             final posts = snapshot.data?.docs ?? [];
 
             if (posts.isEmpty) {
-              return const Center(child: Text("No posts yet"));
+              return SizedBox(
+                height: MediaQuery.sizeOf(context).height/2,
+                child: Center(
+                  child: Text(
+                    "No posts yet",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600
+                    ),
+                  )
+                ),
+              );
             }
 
             return GridView.builder(
@@ -180,24 +166,26 @@ class _ProfilePageState extends State<ProfilePage> {
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image),
-                              );
-                            },
+                          child: Center(
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.broken_image),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

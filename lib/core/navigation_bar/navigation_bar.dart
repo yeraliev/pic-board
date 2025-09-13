@@ -42,6 +42,7 @@ class _CustomBarState extends State<CustomBar>
   }
 
   void onTappedIndex(int index) {
+    if (!mounted) return;
     setState(() {
       selectedPage = index;
     });

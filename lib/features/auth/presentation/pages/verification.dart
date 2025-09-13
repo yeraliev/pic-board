@@ -48,6 +48,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null && _canResend && !user.emailVerified) {
         await user.sendEmailVerification();
+        if (!mounted) return;
         setState(() {
           _canResend = false;
           _secondsRemaining = 60;

@@ -79,6 +79,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                   : AuthButton(
                   title: 'Save',
                   onPressed: () async {
+                    if (!mounted) return;
                     setState(() {
                       isLoading = true;
                     });
@@ -97,10 +98,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                       } catch (e) {
                         print(e.toString());
                         CustomSnackBar().showSnackBar(context, text: 'Failed to change password, try later!', type: 'error');
+                        if (!mounted) return;
                         setState(() {
                           isLoading = false;
                         });
                       }
+                      if (!mounted) return;
                       setState(() {
                         isLoading = false;
                       });
