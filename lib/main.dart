@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pic_board/core/navigation_bar/navigation_bar.dart';
 import 'package:pic_board/core/theme/theme_provider.dart';
 import 'package:pic_board/core/widgets/loading_dialog.dart';
+import 'package:pic_board/features/add_post/post_viewmodel/add_post_viewmodel.dart';
 import 'package:pic_board/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:pic_board/features/auth/presentation/pages/verification.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AddPostViewModel()..loadGallery()),
       ],
       child: const MyApp(),
     ),
