@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pic_board/features/board/presentation/pages/home_page.dart';
-import '../../features/add_post/presentation/pages/add_post_page.dart';
+import '../../features/add_post/post_view/add_post_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 
 class CustomBar extends StatefulWidget {

@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pic_board/core/widgets/loading_dialog.dart';
 import 'package:pic_board/features/auth/data/services/auth_service.dart';
 import 'package:pic_board/features/auth/presentation/widgets/auth_button.dart';
-import '../../../../core/snackbar/custom_snackbar.dart';
+import '../../../core/snackbar/custom_snackbar.dart';
 
 class PostCaptionPage extends StatefulWidget {
   File image;

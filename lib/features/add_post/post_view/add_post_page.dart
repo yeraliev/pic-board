@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:pic_board/features/add_post/post_viewmodel/add_post_viewmodel.dart';
-import 'package:pic_board/features/add_post/presentation/pages/caption_page.dart';
+import 'package:pic_board/features/add_post/post_view/caption_page.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/snackbar/custom_snackbar.dart';
+import '../../../core/snackbar/custom_snackbar.dart';
 
 class AddPostPage extends StatefulWidget {
   const AddPostPage({Key? key}) : super(key: key);
@@ -42,8 +42,8 @@ class _AddPostPageState extends State<AddPostPage> {
                 children: [
                   Image.memory(
                     snapshot.data!,
-                    fit: BoxFit.contain,   // was cover
-                    gaplessPlayback: true, // helps with refresh
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
                   ),
                   if (selectedMedia!.type == AssetType.video)
                     const Center(
